@@ -24,6 +24,8 @@ WORKDIR /app
 
 # Copy dependency files first
 COPY package.json bun.lock ./
+# Skip python check and internal binary download during bun install
+ENV YOUTUBE_DL_SKIP_PYTHON_CHECK=1
 RUN bun install --frozen-lockfile
 
 # Copy source code
