@@ -2,6 +2,7 @@ import { Readable } from 'node:stream';
 import youtubedl from 'youtube-dl-exec';
 import { createAudioResource, demuxProbe } from '@discordjs/voice';
 import type { Track, AudioStream } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export async function createAudioStream(track: Track, volume: number): Promise<AudioStream> {
   const target = track.source === 'spotify'
@@ -10,6 +11,7 @@ export async function createAudioStream(track: Track, volume: number): Promise<A
 
   if (!target) throw new Error('URL inválida');
 
+  logger.info(`Obtendo URL de áudio do YouTube para: ${track.title}`);
   const direct = await youtubedl(target, {
     getUrl: true,
     format: 'bestaudio/best',
@@ -23,6 +25,7 @@ export async function createAudioStream(track: Track, volume: number): Promise<A
     throw new Error('Falha ao obter stream de áudio do YouTube');
   }
 
+  logger.info('Stream URL obtida, abrindo conexão...');
   const response = await fetch(directUrl, {
     headers: {
       'User-Agent': 'Mozilla/5.0',
@@ -33,14 +36,17 @@ export async function createAudioStream(track: Track, volume: number): Promise<A
   }
 
   const stream = Readable.fromWeb(response.body as unknown as ReadableStream);
+  logger.info('Probe de áudio...');
   const probe = await demuxProbe(stream);
 
+  logger.info('Criando AudioResource...');
   const resource = createAudioResource(probe.stream, {
     inputType: probe.type,
     inlineVolume: true,
   });
 
   resource.volume?.setVolume(volume / 100);
+  logger.info(`AudioResource criado com volume ${volume}%`);
 
   return resource;
 }

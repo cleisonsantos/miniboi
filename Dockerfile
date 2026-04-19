@@ -2,17 +2,15 @@ FROM oven/bun:1 AS base
 
 WORKDIR /app
 
-# Install dependencies only when needed
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-# Copy source
 COPY src ./src
 
-# Production image
 FROM base AS runner
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
-
-EXPOSE 3000
+RUN apt-get update && \
+    apt-get install -y ffmpeg python3 python3-pip && \
+    pip3 install yt-dlp && \
+    rm -rf /var/lib/apt/lists/*
 
 CMD ["bun", "run", "src/index.ts"]

@@ -2,16 +2,16 @@
   "name": "miniboi",
   "module": "src/index.ts",
   "type": "module",
-  "private": false,
+  "private": true,
   "scripts": {
-    "start": "tsx src/index.ts",
-    "dev": "tsx watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "dev": "bun --watch src/index.ts",
     "typecheck": "bunx tsc --noEmit",
     "build": "bun build src/index.ts --outdir dist --target bun"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "tsx": "^4.20.6"
+    "@types/spotify-web-api-node": "^5.0.11"
   },
   "peerDependencies": {
     "typescript": "^5"

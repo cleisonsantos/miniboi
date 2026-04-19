@@ -26,9 +26,9 @@ export function nowPlayingEmbed(track: Track) {
     .setURL(track.url || track.spotifyUrl || undefined)
     .setThumbnail(track.thumbnail)
     .addFields(
-      { name: 'Artista', value: track.artist || 'Desconhecido', inline: true },
+      { name: 'Artista', value: track.artist ?? 'Desconhecido', inline: true },
       { name: 'Duração', value: durationStr, inline: true },
-      { name: 'Pedida por', value: track.requestedBy, inline: true }
+      { name: 'Pedida por', value: track.requestedBy ?? 'Desconhecido', inline: true }
     )
     .setFooter({ text: bar });
 }

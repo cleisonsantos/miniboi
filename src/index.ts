@@ -1,9 +1,10 @@
-import './config/env.js'; // Validates env on load
+import './config/env.js';
 import { client } from './client.js';
 import { deployCommands } from './commands/index.js';
 import { initSpotify } from './music/sources/spotify.js';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
+import { queues } from './music/queue.js';
 
 async function bootstrap() {
   logger.info('🚀 Iniciando MiniBoi v1.0 - Discord Music Bot');
@@ -18,11 +19,18 @@ async function bootstrap() {
   logger.info('Bot logado e pronto!');
 }
 
+async function gracefulShutdown() {
+  logger.info('Recebido sinal de desligamento, fechando graciosamente...');
+  for (const queue of queues.values()) {
+    queue.destroy();
+  }
+  client.destroy();
+  process.exit(0);
+}
+
 ['SIGINT', 'SIGTERM'].forEach(signal => {
   process.on(signal, () => {
-    logger.info('Recebido sinal de desligamento, fechando graciosamente...');
-    client.destroy();
-    process.exit(0);
+    gracefulShutdown();
   });
 });
 

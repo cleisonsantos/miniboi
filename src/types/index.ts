@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, type SlashCommandOptionsOnlyBuilder, ChatInputCommandInteraction } from 'discord.js';
 import type { VoiceConnection, AudioPlayer, AudioResource } from '@discordjs/voice';
 
 export type TrackSource = 'youtube' | 'spotify';
@@ -26,11 +26,11 @@ export interface MusicQueue {
   textChannelId: string;
 }
 
-export type BotCommandExecute = (interaction: ChatInputCommandInteraction) => Promise<void>;
+export type BotCommandExecute = (interaction: ChatInputCommandInteraction) => Promise<unknown>;
 
 export interface BotCommand {
-  data: SlashCommandBuilder;
+  data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
   execute: BotCommandExecute;
 }
 
-export type AudioStream = Promise<AudioResource>;
+export type AudioStream = AudioResource;

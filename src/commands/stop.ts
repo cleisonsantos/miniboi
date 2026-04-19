@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import type { BotCommand } from '../types/index.js';
 import { requireQueue, requireSameVoiceChannel } from '../utils/permissions.js';
-import { MusicQueue } from '../music/queue.js';
 import { successEmbed } from '../utils/embed.js';
 
 export const stopCommand: BotCommand = {

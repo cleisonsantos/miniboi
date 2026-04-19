@@ -1,4 +1,4 @@
-# 🎵 MiniBoi TS - Discord Music Bot
+# 🎵 MiniBoi - Discord Music Bot
 
 Bot Discord para música com suporte a **YouTube** e **Spotify**, fila inteligente, slash commands modernos e TypeScript.
 
@@ -13,7 +13,7 @@ Reescrito do `bot.js` original com **melhorias significativas** baseadas no seu 
 - **Volume** 0-100%
 - **Loop** (off/track/queue)
 - **Shuffle** Fisher-Yates
-- **Embeds bonitos** com thumbnails e progresso
+- **Embeds bonitos** com thumbnails
 - **Permissões** (voice channel check)
 - **Error handling** com feedback
 - **Bun runtime** (rápido)
@@ -21,7 +21,7 @@ Reescrito do `bot.js` original com **melhorias significativas** baseadas no seu 
 - **Validação env** Zod
 - **Logger** timestamped
 
-## 📁 Estrutura (raiz do repositório)
+## 📁 Estrutura
 
 ```
 .
@@ -31,15 +31,18 @@ Reescrito do `bot.js` original com **melhorias significativas** baseadas no seu 
 │   ├── commands/                     # Slash commands (play.ts, pause.ts, etc.)
 │   ├── music/
 │   │   ├── queue.ts                  # Fila + player + conexão voice
-│   │   ├── player.ts                 # AudioResource + volume
+│   │   ├── player.ts                 # AudioResource + volume (yt-dlp)
 │   │   └── sources/                  # youtube.ts spotify.ts index.ts
 │   ├── utils/                        # embed.ts permissions.ts logger.ts
 │   └── types/index.ts                # Track, Queue, Command interfaces
+├── bot.js                            # Versão original JS (referência)
+├── bot.go                            # Protótipo Go (referência)
 ├── .env.example                      # Template env
-├── package.json                      # Bun deps (discord.js, play-dl, etc.)
-├── tsconfig.json                     # TS config (ESNext, paths @/)
+├── package.json                      # Bun deps
+├── tsconfig.json                     # TS config
 ├── Dockerfile
 ├── docker-compose.yml
+├── .dockerignore
 └── README.md
 ```
 
@@ -55,7 +58,7 @@ Reescrito do `bot.js` original com **melhorias significativas** baseadas no seu 
    ```
 3. `bun install`
 4. **Invite bot**: OAuth2 URL com `bot` + `applications.commands` scopes
-5. `bun run src/index.ts` ou `bun dev` (watch mode)
+5. `bun run start` ou `bun run dev` (watch mode)
 
 Bot registra slash commands globalmente no startup.
 
@@ -86,23 +89,42 @@ docker compose up --build -d
 
 ## 🔧 Troubleshooting
 
-- **No sound?** FFmpeg instalado? Docker tem.
+- **No sound?** FFmpeg + yt-dlp instalados? Docker já inclui.
 - **Spotify fail?** Client credentials no Spotify Dashboard (Web API).
 - **Commands not appearing?** Global sync leva 1h; use guild commands para teste.
-- **Type errors?** Libs (@types/play-dl imprecisas), ignora.
 - **Token exposto?** Rotacione antigo do .env root.
 
 ## 📊 Dependências
 
-- `discord.js` voice
-- `play-dl` YT/SP stream
-- `spotify-web-api-node` metadata
-- `zod` env
+- `discord.js` + `@discordjs/voice` - Discord API e voz
+- `youtube-dl-exec` (yt-dlp) - YouTube stream e busca
+- `spotify-web-api-node` - Spotify metadata
+- `zod` - Env validation
+- `opusscript` - Opus codec
+- `dotenv` - Env loading
+- `ffmpeg-static` - FFmpeg binary
 
 **Sem deps mortas** (limpou 7 do original).
 
-## Próximo: Go Version
+## ☁️ Deploy
 
-Estrutura similar em `miniboi-go/` para estudos.
+### Docker (recomendado)
+
+Use `docker compose up --build -d` em qualquer VPS/container.
+
+### Cloudflare Workers
+
+**Este bot é incompatível com Cloudflare Workers** porque depende de:
+- Gateway WebSocket (conexão TCP persistente)
+- UDP sockets para voz (RTP)
+- `child_process` para yt-dlp
+- Binários nativos (ffmpeg, opus)
+
+Para deploy, use uma VM, VPS, ou container com Node.js/Bun.
+
+## 📝 Notas
+
+- `bot.js` e `bot.go` são versões antigas mantidas como referência
+- A versão Go será reimplementada futuramente para estudos
 
 **Pronto para produção! 🎉**
