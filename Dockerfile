@@ -31,7 +31,8 @@ WORKDIR /app
 USER bun
 
 COPY --chown=bun:bun package.json bun.lock ./
-RUN bun install --production --frozen-lockfile --omit=optional
+RUN bun install --production --frozen-lockfile && \
+    bun -e "require('@snazzah/davey')"
 
 COPY --chown=bun:bun src ./src
 
