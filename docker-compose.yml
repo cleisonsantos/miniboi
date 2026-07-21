@@ -4,5 +4,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    stdin_open: true
-    tty: true
+    init: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

@@ -23,17 +23,10 @@ export const commands: BotCommand[] = [
   loopCommand,
 ];
 
-export async function deployCommands(token: string, clientId: string) {
+export async function deployCommands(token: string, clientId: string): Promise<void> {
   const { REST, Routes } = await import('discord.js');
   const rest = new REST({ version: '10' }).setToken(token);
-
-  try {
-    console.log('Atualizando comandos slash (app level)...');
-    await rest.put(Routes.applicationCommands(clientId), {
-      body: commands.map((command) => command.data.toJSON()),
-    });
-    console.log(`${commands.length} comandos slash atualizados com sucesso!`);
-  } catch (error) {
-    console.error('Erro ao atualizar comandos:', error);
-  }
+  await rest.put(Routes.applicationCommands(clientId), {
+    body: commands.map((command) => command.data.toJSON()),
+  });
 }

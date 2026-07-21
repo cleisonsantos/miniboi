@@ -1,67 +1,41 @@
-import SpotifyWebApi from 'spotify-web-api-node';
 import { env } from '../../config/env.js';
 import type { Track } from '../../types/index.js';
+import { SpotifyClient } from './spotify-client.js';
 
-let spotifyApi: SpotifyWebApi | null = null;
-let refreshTimeout: NodeJS.Timeout | null = null;
+let spotifyClient: SpotifyClient | null = null;
 
-export async function initSpotify() {
-  spotifyApi = new SpotifyWebApi({
+export async function initSpotify(): Promise<void> {
+  spotifyClient?.destroy();
+  const client = new SpotifyClient({
     clientId: env.SPOTIFY_CLIENT_ID,
     clientSecret: env.SPOTIFY_CLIENT_SECRET,
   });
 
-  await refreshAccessToken();
+  try {
+    await client.init();
+    spotifyClient = client;
+  } catch (error) {
+    client.destroy();
+    spotifyClient = null;
+    throw error;
+  }
 }
 
-async function refreshAccessToken() {
-  if (!spotifyApi) return;
+export function shutdownSpotify(): void {
+  spotifyClient?.destroy();
+  spotifyClient = null;
+}
 
-  try {
-    const data = await spotifyApi.clientCredentialsGrant();
-    spotifyApi.setAccessToken(data.body.access_token);
-    const expiresIn = data.body.expires_in * 1000 - 60 * 1000; // 1 min early
-    refreshTimeout = setTimeout(refreshAccessToken, expiresIn);
-  } catch (error) {
-    console.error('Spotify token refresh error:', error);
-  }
+export function isSpotifyReady(): boolean {
+  return spotifyClient?.isReady() ?? false;
 }
 
 export async function resolveSpotifyTrack(url: string, requestedBy: string): Promise<Track> {
-  if (!spotifyApi) throw new Error('Spotify não inicializado');
-
-  const trackId = new URL(url).pathname.split('/track/')[1].split('?')[0];
-  const data = await spotifyApi.getTrack(trackId);
-  const track = data.body;
-
-  return {
-    title: track.name,
-    artist: track.artists[0]?.name ?? 'Unknown',
-    spotifyUrl: url,
-    url: '',
-    source: 'spotify',
-    duration: Math.floor(track.duration_ms / 1000),
-    requestedBy,
-  };
+  if (!spotifyClient) throw new Error('Spotify não inicializado');
+  return spotifyClient.resolveTrack(url, requestedBy);
 }
 
 export async function resolveSpotifyPlaylist(url: string, requestedBy: string): Promise<Track[]> {
-  if (!spotifyApi) throw new Error('Spotify não inicializado');
-
-  const playlistId = new URL(url).pathname.split('/playlist/')[1].split('?')[0];
-  const data = await spotifyApi.getPlaylistTracks(playlistId);
-  const tracks: Track[] = [];
-  for (const item of data.body.items) {
-    const track = item.track as SpotifyApi.TrackObjectFull;
-    tracks.push({
-      title: track.name,
-      artist: track.artists[0]?.name ?? 'Unknown',
-      spotifyUrl: track.external_urls.spotify,
-      url: '',
-      source: 'spotify',
-      duration: Math.floor(track.duration_ms / 1000),
-      requestedBy,
-    });
-  }
-  return tracks;
+  if (!spotifyClient) throw new Error('Spotify não inicializado');
+  return spotifyClient.resolvePlaylist(url, requestedBy);
 }

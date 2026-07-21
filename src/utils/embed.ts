@@ -23,8 +23,8 @@ export function nowPlayingEmbed(track: Track) {
   return new EmbedBuilder()
     .setColor(0x00ff00)
     .setTitle(track.title)
-    .setURL(track.url || track.spotifyUrl || undefined)
-    .setThumbnail(track.thumbnail)
+    .setURL(track.url || track.spotifyUrl || null)
+    .setThumbnail(track.thumbnail ?? null)
     .addFields(
       { name: 'Artista', value: track.artist ?? 'Desconhecido', inline: true },
       { name: 'Duração', value: durationStr, inline: true },

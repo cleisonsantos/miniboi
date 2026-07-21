@@ -7,7 +7,9 @@ Bot Discord para música moderno e performático, desenvolvido em **TypeScript**
 - **Slash Commands** (`/play`, `/pause`, etc.)
 - **YouTube** vídeos, playlists e busca via `yt-dlp`
 - **Spotify** tracks e playlists (bridge inteligente para áudio do YouTube)
-- **Fila por servidor** com auto-advance e persistência em memória
+- **Fila por servidor** com dequeue O(1), auto-advance e persistência em memória
+- **Prefetch da próxima faixa** e cache curto de URLs/metadata
+- **Playlists limitadas a 500 faixas** para proteger memória e latência
 - **Volume dinâmico** 0-100%
 - **Modos de Loop** (off/track/queue)
 - **Shuffle** robusto (Fisher-Yates)
@@ -33,7 +35,7 @@ Bot Discord para música moderno e performático, desenvolvido em **TypeScript**
 ├── .env.example                      # Template de variáveis de ambiente
 ├── package.json                      # Dependências e scripts do Bun
 ├── tsconfig.json                     # Configuração do TypeScript
-├── Dockerfile                        # Build multi-stage (Bun + ffmpeg + yt-dlp)
+├── Dockerfile                        # Imagem Bun endurecida com FFmpeg e yt-dlp fixado
 ├── docker-compose.yml                # Orquestração simples
 └── README.md
 ```
@@ -53,9 +55,19 @@ Bot Discord para música moderno e performático, desenvolvido em **TypeScript**
    - `DISCORD_CLIENT_ID`: ID da aplicação
    - `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`: App no Spotify Dashboard
 4. Instale as dependências: `bun install`
-5. Inicie o bot:
+5. Publique comandos slash quando houver mudança: `bun run deploy:commands`
+6. Inicie o bot:
    - Desenvolvimento: `bun run dev` (com auto-reload)
    - Produção: `bun run start`
+
+### Configuração operacional
+
+| Variável | Padrão | Uso |
+|----------|--------|-----|
+| `LOG_LEVEL` | `info` | `debug`, `info`, `warn` ou `error` |
+| `LOG_FORMAT` | `pretty`/`json` | JSON automático em produção |
+| `HEALTH_HOST` | `0.0.0.0` | Interface do health server |
+| `HEALTH_PORT` | `3000` | Porta interna de health/readiness |
 
 ## 🐳 Docker
 
@@ -64,6 +76,25 @@ A forma mais simples de rodar sem se preocupar com dependências locais (FFmpeg/
 ```bash
 docker compose up --build -d
 ```
+
+Imagem executa como usuário não-root e possui healthcheck interno:
+
+- `GET /health/live`: processo vivo;
+- `GET /health/ready`: runtime, Discord e Spotify prontos.
+
+Porta não é publicada pelo Compose. Para monitoramento externo, publique `HEALTH_PORT` explicitamente.
+
+## 🔄 CI e release
+
+GitHub Actions executa instalação com lock congelado, auditoria, typecheck, testes, bundle e build Docker. Fluxo recomendado:
+
+```bash
+bun run ci
+bun run deploy:commands  # somente quando comandos slash mudarem
+bun run start
+```
+
+Falha no deploy de comandos retorna exit code diferente de zero. Startup normal não modifica comandos globais.
 
 ## 📋 Comandos Disponíveis
 
@@ -85,9 +116,10 @@ docker compose up --build -d
 - **Linguagem:** TypeScript
 - **Runtime:** Bun
 - **Biblioteca Discord:** `discord.js` v14
-- **Áudio:** `@discordjs/voice`
+- **Áudio:** `@discordjs/voice`, preferência por WebM/Opus e prefetch
+- **Métricas:** agregação em memória com relatório periódico
 - **Streaming:** `youtube-dl-exec` (wrapper yt-dlp)
-- **Metadata:** `spotify-web-api-node`
+- **Metadata:** Spotify Web API via `fetch` nativo
 - **Validação:** `Zod`
 
 ## ☁️ Deploy

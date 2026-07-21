@@ -1,26 +1,9 @@
 import type { Track } from '../../types/index.js';
 import { resolveYoutubeVideo, resolveYoutubePlaylist, searchYoutube } from './youtube.js';
 import { resolveSpotifyTrack, resolveSpotifyPlaylist } from './spotify.js';
+import { detectSource } from './source-detection.js';
 
-type SourceType = 'youtube_video' | 'youtube_playlist' | 'spotify_track' | 'spotify_playlist' | 'search';
-
-function detectSource(input: string): SourceType {
-  const ytVideo = /^(https?:\/\/)?(www\.youtube\.com\/watch\?v=|youtu\.be\/)/.test(input);
-  if (ytVideo) return 'youtube_video';
-
-  const ytPlaylist = /list=/.test(input);
-  if (ytPlaylist) return 'youtube_playlist';
-
-  const spTrack = /open\.spotify\.com\/track\//.test(input);
-  if (spTrack) return 'spotify_track';
-
-  const spPlaylist = /open\.spotify\.com\/playlist\//.test(input);
-  if (spPlaylist) return 'spotify_playlist';
-
-  return 'search';
-}
-
-export { detectSource };
+export { detectSource } from './source-detection.js';
 
 export async function resolveTracks(input: string, requestedBy: string): Promise<Track[]> {
   const type = detectSource(input);
