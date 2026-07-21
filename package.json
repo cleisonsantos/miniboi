@@ -9,7 +9,7 @@
     "deploy:commands": "bun run src/scripts/deploy-commands.ts",
     "test": "bun test",
     "typecheck": "bunx tsc --noEmit",
-    "build": "bun build src/index.ts --outdir dist --target bun",
+    "build": "bun build src/index.ts --outdir dist --target bun --external ffmpeg-static",
     "check": "bun run typecheck && bun test && bun run build",
     "ci": "bun audit && bun run check"
   },
