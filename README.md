@@ -67,7 +67,7 @@ Bot Discord para música moderno e performático, desenvolvido em **TypeScript**
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn` ou `error` |
 | `LOG_FORMAT` | `pretty`/`json` | JSON automático em produção |
 | `HEALTH_HOST` | `0.0.0.0` | Interface do health server |
-| `HEALTH_PORT` | `3000` | Porta interna de health/readiness |
+| `HEALTH_PORT` | `$PORT` ou `3000` | Porta de health/readiness; compatível com Railway |
 
 ## 🐳 Docker
 

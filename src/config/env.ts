@@ -9,7 +9,8 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   LOG_FORMAT: z.enum(['json', 'pretty']).optional(),
   HEALTH_HOST: z.string().min(1).default('0.0.0.0'),
-  HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
+  HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).optional(),
+  PORT: z.coerce.number().int().min(1).max(65_535).optional(),
 });
 
 const result = envSchema.safeParse(process.env);
@@ -24,4 +25,5 @@ export const env = {
   ...result.data,
   LOG_FORMAT: result.data.LOG_FORMAT
     ?? (process.env.NODE_ENV === 'production' ? 'json' : 'pretty'),
+  HEALTH_PORT: result.data.HEALTH_PORT ?? result.data.PORT ?? 3_000,
 };

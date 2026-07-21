@@ -38,10 +38,9 @@ COPY --chown=bun:bun src ./src
 ENV NODE_ENV=production \
     HOME=/tmp \
     XDG_CACHE_HOME=/tmp/.cache \
-    HEALTH_HOST=0.0.0.0 \
-    HEALTH_PORT=3000
+    HEALTH_HOST=0.0.0.0
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD ["bun", "-e", "try { const port = process.env.HEALTH_PORT ?? '3000'; const response = await fetch('http://127.0.0.1:' + port + '/health/ready'); process.exit(response.ok ? 0 : 1); } catch { process.exit(1); }"]
+  CMD ["bun", "-e", "try { const port = process.env.HEALTH_PORT ?? process.env.PORT ?? '3000'; const response = await fetch('http://127.0.0.1:' + port + '/health/ready'); process.exit(response.ok ? 0 : 1); } catch { process.exit(1); }"]
 
 CMD ["bun", "run", "src/index.ts"]
